@@ -27,14 +27,16 @@ def Generate_Key():
   return packed_public_key, packed_private_key
 
 def Generate_Private_Key(seed):
-  domf = '0100000000000000'
+  domf = bin(int('0100000000000000', 16))[2:]
+  domf = '0' * (64 - len(domf)) + domf 
   f = Sample_Tplus(seed, domf)
   fp = S3_inverse(f)
   return f, fp
 
 def Generate_Public_Key(seed, f):
   global q
-  domg = '0200000000000000'
+  domg = bin(int('0100000000000000', 16))[2:]
+  domg = '0' * (64 - len(domg)) + domg 
   v0 = Sample_Tplus(seed, domg)
   g = S3_to_Zx(v0)
   v1 = Sq_inverse(f)
@@ -47,7 +49,7 @@ def Generate_Public_Key(seed, f):
 def Encapsulate(packed_public_key):
   global seed_bits, coin_bits, shared_key_bits, s3_packed_bits
   seed = ''.join(random.choice('01') for _ in range(seed_bits))
-  domm ='0000000000000000'
+  domm = '0' * 64
   m = Sample_T(seed, domm)
   packed_m = S3_to_bits(m)
   hashes = SHAKE128(packed_m, coin_bits + shared_key_bits + s3_packed_bits)
@@ -77,7 +79,7 @@ def Decapsulate(packed_key_pair, packed_cca_ct):
 
 def NTRU_OWF_Public(packed_m, packed_public_key, coins):
   h = Rq_from_bits(packed_public_key)
-  domr = '0000000000000000'
+  domr = '0' * 64
   v0 = Sample_T(coins, domr)
   r = S3_to_Zx(v0)
   v1 = S3_from_bits(packed_m)
